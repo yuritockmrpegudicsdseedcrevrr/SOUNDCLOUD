@@ -1,9 +1,8 @@
-# Importe after_this_request junto com os outros
+import os
 from flask import Flask, request, jsonify, send_file, send_from_directory, after_this_request
 import yt_dlp
 import requests
 import subprocess
-import os
 import uuid
 
 app = Flask(__name__, static_folder='.')
@@ -35,7 +34,6 @@ def baixar():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             thumbnail_url = info.get('thumbnail')
-            # ALTERADO: A variável 'title' já tem o nome que queremos
             title = info.get('title', 'musica')
             ext = info.get('ext', 'webm')
 
@@ -46,8 +44,6 @@ def baixar():
         with open(cover_file, 'wb') as f:
             f.write(img_data)
 
-        # ALTERADO: Define o nome do download usando o título original.
-        # A variável 'safe_title' não é mais necessária.
         download_name = f"{title}.mp4"
         mp4_file_path = f"{temp_filename_base}.mp4"
 
@@ -66,11 +62,9 @@ def baixar():
                     print(f"Arquivo final removido: {mp4_file_path}")
             except Exception as e:
                 print(f"Erro ao limpar arquivo final: {e}")
-            # NOVO: Garante que o nome do arquivo com caracteres especiais funcione
-            response.headers['Content-Disposition'] = response.headers['Content-Disposition'].encode('latin-1').decode('utf-8')
             return response
 
-        return send_file(mp4_file_path, as_attachment=True, download_name=download_name)
+        return send_file(mp4_file_path, as_attachment=True, download_name=download_name, mimetype='video/mp4')
 
     except subprocess.CalledProcessError as e:
         error_message = e.stderr.decode('utf-8') if e.stderr else str(e)
@@ -84,6 +78,6 @@ def baixar():
         if cover_file and os.path.exists(cover_file):
             os.remove(cover_file)
 
-if __name__ == '__main__':
-    # Você pode voltar a usar threaded=True se quiser, agora é seguro.
-    app.run(debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
