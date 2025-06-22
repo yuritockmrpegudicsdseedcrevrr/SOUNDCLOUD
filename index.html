@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-br" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SoundCloud Downloader</title>
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ff5500, #ffbb33);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* Barras laterais fixas */
+    .ad-left, .ad-right {
+      position: fixed;
+      top: 0;
+      width: 120px;
+      height: 100%;
+      background: #1a1a1a;
+      border: 2px solid #ff5500;
+      box-shadow: 0 0 20px rgba(255,85,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px 10px;
+      font-size: 14px;
+      user-select: none;
+      z-index: 9999;
+    }
+    .ad-left {
+      left: 0;
+    }
+    .ad-right {
+      right: 0;
+    }
+    .ad-container {
+      width: 100%;
+      margin-bottom: 15px;
+      color: #ffa65c;
+      font-weight: 600;
+      text-align: center;
+    }
+    .ad-container a {
+      color: #ffbb55;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .ad-container a:hover {
+      text-decoration: underline;
+    }
+
+    /* Conteúdo centralizado */
+    main {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 1;
+      position: relative;
+    }
+
+    header {
+      text-align: center;
+      font-weight: 800;
+      font-size: 32px;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+      user-select: none;
+      text-shadow: 0 0 10px #ff5500;
+    }
+
+    .container {
+      background: #222;
+      padding: 40px 30px 30px 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(255,85,0,0.8);
+      text-align: center;
+      color: white;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 16px 18px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      margin-bottom: 25px;
+      outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+    input[type="text"]:focus {
+      box-shadow: 0 0 8px #ff5500;
+    }
+
+    button {
+      background: #ff5500;
+      border: none;
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 18px;
+      color: white;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.3s ease;
+      user-select: none;
+      box-shadow: 0 4px 12px rgba(255,85,0,0.6);
+    }
+    button:hover:not(:disabled) {
+      background: #e64e00;
+      box-shadow: 0 6px 20px rgba(230,78,0,0.9);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #status {
+      margin-top: 25px;
+      min-height: 28px;
+      font-weight: 700;
+      font-size: 16px;
+      user-select: none;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Spinner */
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s ease-in-out infinite;
+      display: inline-block;
+      margin-right: 12px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsividade */
+    @media(max-width: 650px) {
+      .ad-left, .ad-right {
+        display: none; /* Esconde ads laterais no mobile */
+      }
+      main {
+        max-width: 90vw;
+        padding: 30px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ad-left">
+    <!-- Coloque seu código de anúncio aqui -->
+    <div class="ad-container">
+      <a href="#" target="_blank" rel="noopener noreferrer">Anúncio Lateral 1</a>
+    </div>
+    <div class="ad-container">
+      <a href="#" target="_blank" rel="noopener noreferrer">Promoção / Link</a>
+    </div>
+  </div>
+
+  <main>
+    <header>
+      SOUNDCL🅾️UD DOWNLOADER
+    </header>
+
+    <div class="container">
+      <h1>Baixe sua música em MP4</h1>
+      <input id="url" type="text" placeholder="Cole a URL da música do SoundCloud" autocomplete="off" />
+      <button id="btn" onclick="baixar()">Baixar e Converter</button>
+      <div id="status"></div>
+    </div>
+  </main>
+
+  <div class="ad-right">
+    <!-- Coloque seu código de anúncio aqui -->
+    <div class="ad-container">
+      <a href="#" target="_blank" rel="noopener noreferrer">Anúncio Lateral 2</a>
+    </div>
+    <div class="ad-container">
+      <a href="#" target="_blank" rel="noopener noreferrer">Links & Parcerias</a>
+    </div>
+  </div>
+
+  <script>
+    async function baixar() {
+      const url = document.getElementById('url').value.trim();
+      const status = document.getElementById('status');
+      const btn = document.getElementById('btn');
+
+      if (!url) {
+        status.textContent = '❌ Cole uma URL válida!';
+        return;
+      }
+
+      status.innerHTML = '<div class="spinner"></div> Processando... Isso pode levar alguns segundos.';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('/baixar', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({url})
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          status.textContent = `❌ Erro: ${data.message}`;
+          btn.disabled = false;
+          return;
+        }
+
+        const disposition = response.headers.get('Content-Disposition');
+        let filename = "video.mp4";
+        if (disposition && disposition.indexOf('attachment') !== -1) {
+          const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+          if (matches != null && matches[1]) {
+            filename = matches[1].replace(/['"]/g, '');
+          }
+        }
+
+        const blob = await response.blob();
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = decodeURIComponent(filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        status.textContent = '✅ Download iniciado!';
+      } catch(e) {
+        status.textContent = '❌ Erro na conexão com o servidor.';
+      }
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
